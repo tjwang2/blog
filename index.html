@@ -325,12 +325,13 @@
     </div>
 
     <script>
-        // ========== Gist 配置（替换为你的信息） ==========
-        const GIST_ID = '07ecf70971a4435dd86db5969367f8e5'; // Gist页面URL中 https://gist.github.com/你的用户名/ 后的字符串
-        const GITHUB_TOKEN = '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'; // 仅需gist权限的Token
+        // ========== 只需要修改这里的两个配置项！！！ ==========
+        const GIST_ID = '07ecf70971a4435dd86db5969367f8e5'; // 第一步：替换成你的Gist ID
+        const GITHUB_TOKEN = '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'; // 第二步：替换成你的GitHub Token
         const GIST_FILE_NAME = 'blog-logs.json';
+        // ========== 配置项结束 ==========
 
-        // ========== 全局变量 ==========
+        // 全局变量
         let logs = [];
         const publishBtn = document.getElementById('publish-btn');
         const logTitle = document.getElementById('log-title');
@@ -347,33 +348,45 @@
         const voiceStatus = document.getElementById('voice-status');
         const envTip = document.getElementById('env-tip');
 
-        // ========== Gist 数据交互核心函数 ==========
+        // ========== Gist 同步核心函数 ==========
         // 从Gist获取日志
         async function fetchLogsFromGist() {
             try {
+                // 检查配置是否填写
+                if (!GIST_ID || GIST_ID === '替换成你的Gist ID' || !GITHUB_TOKEN || GITHUB_TOKEN === '替换成你的GitHub Token') {
+                    throw new Error('请先填写Gist ID和GitHub Token配置项');
+                }
+
                 const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-                if (!response.ok) throw new Error('获取日志失败，状态码：' + response.status);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Gist请求失败：${response.status} - ${errorText}`);
+                }
                 
                 const gist = await response.json();
                 const logContent = gist.files[GIST_FILE_NAME].content;
-                let logs = JSON.parse(logContent || '[]');
+                let gistLogs = JSON.parse(logContent || '[]');
                 
-                // 兼容原有数据格式
-                logs = logs.map(log => ({ 
+                // 兼容数据格式
+                gistLogs = gistLogs.map(log => ({ 
                     tags: [], 
                     time: log.time || new Date().toLocaleString(),
                     date: log.date || new Date(log.time || new Date()).toISOString().split('T')[0],
                     ...log 
                 }));
-                return logs;
+                
+                // 保存到本地缓存
+                localStorage.setItem('personalBlogLogs', JSON.stringify(gistLogs));
+                return gistLogs;
             } catch (err) {
-                console.error('从Gist加载日志失败，使用本地缓存:', err);
-                // 降级：使用localStorage作为备用
+                console.error('从Gist加载失败，使用本地缓存:', err);
+                // 降级到本地存储
                 const localLogs = JSON.parse(localStorage.getItem('personalBlogLogs')) || [];
                 return localLogs.map(log => ({ 
                     tags: [], 
@@ -387,14 +400,25 @@
         // 保存日志到Gist
         async function saveLogsToGist(logs) {
             try {
+                // 检查配置是否填写
+                if (!GIST_ID || GIST_ID === '替换成你的Gist ID' || !GITHUB_TOKEN || GITHUB_TOKEN === '替换成你的GitHub Token') {
+                    throw new Error('请先填写Gist ID和GitHub Token配置项');
+                }
+
                 // 先获取最新的Gist版本（避免冲突）
-                const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                const getResponse = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-                const gist = await response.json();
+
+                if (!getResponse.ok) {
+                    const errorText = await getResponse.text();
+                    throw new Error(`获取Gist失败：${getResponse.status} - ${errorText}`);
+                }
+
+                const gist = await getResponse.json();
                 
                 // 更新Gist内容
                 const updateResponse = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
@@ -407,24 +431,30 @@
                     body: JSON.stringify({
                         files: {
                             [GIST_FILE_NAME]: {
-                                content: JSON.stringify(logs, null, 2) // 格式化JSON，方便查看
+                                content: JSON.stringify(logs, null, 2)
                             }
                         }
                     })
                 });
                 
-                if (!updateResponse.ok) throw new Error('保存日志到Gist失败，状态码：' + updateResponse.status);
-                // 同时更新本地缓存，提升体验
+                if (!updateResponse.ok) {
+                    const errorText = await updateResponse.text();
+                    throw new Error(`保存Gist失败：${updateResponse.status} - ${errorText}`);
+                }
+
+                // 同步更新本地缓存
                 localStorage.setItem('personalBlogLogs', JSON.stringify(logs));
                 return true;
             } catch (err) {
-                console.error('保存到Gist失败，仅保存到本地:', err);
+                console.error('保存到Gist失败:', err);
+                // 降级保存到本地
                 localStorage.setItem('personalBlogLogs', JSON.stringify(logs));
+                alert(`同步到GitHub失败：${err.message}\n日志已保存到本地，请检查配置后重新发布`);
                 return false;
             }
         }
 
-        // ========== 语音输入核心逻辑 ==========
+        // ========== 语音输入功能 ==========
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isRecording = false;       
@@ -635,7 +665,7 @@
             }
         });
 
-        // ========== 日志渲染与筛选逻辑 ==========
+        // ========== 日志渲染和筛选 ==========
         // 渲染日志列表
         function renderLogs(logsToRender) {
             if (logsToRender.length === 0) {
@@ -730,8 +760,10 @@
                 date: now.toISOString().split('T')[0]
             };
 
+            // 添加新日志
             logs.unshift(newLog);
-            // 保存到Gist
+            
+            // 保存到Gist（自动降级到本地）
             const saveSuccess = await saveLogsToGist(logs);
             
             // 清空输入框
@@ -742,7 +774,10 @@
             // 重新渲染
             renderLogs(logs);
             renderTags();
-            alert(saveSuccess ? '日志发布成功（已同步到GitHub Gist）！' : '日志发布成功（仅本地保存，同步GitHub失败）！');
+            
+            if (saveSuccess) {
+                alert('日志发布成功！已同步到GitHub Gist，跨设备都能看到');
+            }
         });
 
         // ========== 页面初始化 ==========
