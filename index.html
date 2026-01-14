@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人博客</title>
+    <style>
+        /* 原有样式完全保留，无修改 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .calendar-area {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .calendar-area h3 {
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .range-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        #date-search-btn {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .tags-area {
+            margin-bottom: 20px;
+        }
+
+        .tags-area h3 {
+            color: #555;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .tag-item {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #e9ecef;
+            border-radius: 20px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .tag-item.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .search-area {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #search-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #search-btn:hover {
+            background: #218838;
+        }
+
+        .form-area {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 150px;
+            line-height: 1.5;
+        }
+
+        #publish-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #publish-btn:hover {
+            background: #0056b3;
+        }
+
+        .voice-btn {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .voice-btn:hover {
+            background: #eee;
+        }
+
+        .voice-btn.recording {
+            background: #fef2f2;
+            color: #dc2626;
+            border-color: #fecdd3;
+        }
+
+        #voice-status {
+            font-size: 0.85rem;
+            margin-left: 10px;
+            color: #999;
+            vertical-align: middle;
+        }
+
+        .voice-status.error {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        .voice-status.tip {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .logs-area h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .log-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .log-item h3 {
+            color: #007bff;
+            margin-bottom: 8px;
+        }
+
+        .log-item .log-tags {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .log-item .log-content {
+            color: #555;
+            line-height: 1.8;
+            margin: 10px 0;
+            white-space: pre-line;
+        }
+
+        .log-item .log-time {
+            color: #999;
+            font-size: 0.85rem;
+            text-align: right;
+        }
+
+        .no-result {
+            text-align: center;
+            color: #999;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+
+        .env-tip {
+            background: #e7f3ff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            color: #0c5460;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>我的个人博客</h1>
+
+        <div class="calendar-area">
+            <h3>按日期/时间段查找日志</h3>
+            <div class="date-range">
+                <input type="date" id="start-date" class="date-input" placeholder="开始日期">
+                <span class="range-text">至</span>
+                <input type="date" id="end-date" class="date-input" placeholder="结束日期">
+                <button id="date-search-btn">查找</button>
+            </div>
+        </div>
+
+        <div class="tags-area">
+            <h3>按标签筛选日志</h3>
+            <div id="tag-list" class="tag-container">
+            </div>
+        </div>
+
+        <div class="search-area">
+            <input type="text" id="search-input" placeholder="输入关键词检索日志（标题/正文）...">
+            <button id="search-btn">全文检索</button>
+        </div>
+
+        <div class="form-area">
+            <h2>发布新日志</h2>
+            <div class="env-tip" id="env-tip">📢 语音输入提示：<br>1. 电脑端建议用Chrome/Edge浏览器；<br>2. 无需说标点！停顿短加逗号，停顿长加句号；<br>3. 说完手动点击停止，标点更精准</div>
+            <div class="form-group">
+                <label for="log-title">日志标题</label>
+                <input type="text" id="log-title" placeholder="输入日志标题...">
+            </div>
+            <div class="form-group">
+                <label for="log-content">日志内容</label>
+                <textarea id="log-content" placeholder="输入日志内容...（敲回车可分段）"></textarea>
+                <button type="button" id="voice-input-btn" class="voice-btn">
+                    🎙️ 语音输入
+                </button>
+                <span id="voice-status"></span>
+            </div>
+            <div class="form-group">
+                <label for="log-tags">日志标签（多个标签用逗号分隔）</label>
+                <input type="text" id="log-tags" placeholder="例如：生活,学习,工作...">
+            </div>
+            <button id="publish-btn">发布日志</button>
+        </div>
+
+        <div class="logs-area">
+            <h2>我的日志列表</h2>
+            <div id="logs-list"></div>
+        </div>
+    </div>
+
+    <script>
+        let logs = JSON.parse(localStorage.getItem('personalBlogLogs')) || [];
+        logs = logs.map(log => ({ 
+            tags: [], 
+            time: log.time || new Date().toLocaleString(),
+            date: log.date || new Date(log.time || new Date()).toISOString().split('T')[0],
+            ...log 
+        }));
+
+        const publishBtn = document.getElementById('publish-btn');
+        const logTitle = document.getElementById('log-title');
+        const logContent = document.getElementById('log-content');
+        const logTags = document.getElementById('log-tags');
+        const logsList = document.getElementById('logs-list');
+        const tagList = document.getElementById('tag-list');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const dateSearchBtn = document.getElementById('date-search-btn');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const voiceInputBtn = document.getElementById('voice-input-btn');
+        const voiceStatus = document.getElementById('voice-status');
+        const envTip = document.getElementById('env-tip');
+
+        // ========== 修复核心：智能语音输入（解决电脑端自动停止） ==========
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isRecording = false;       // 核心状态：是否正在录音
+        let isRestarting = false;      // 新增：是否正在重启识别，避免重复操作
+        let permissionGranted = false; // 麦克风权限是否已授权
+        let tempTranscript = '';       // 缓存完整识别文本
+        let lastResultTime = 0;        // 上一次识别结果的时间戳（判断停顿）
+
+        // 智能断句核心函数：根据停顿时长加标点（逻辑不变）
+        function addPunctuationByPause(rawText, currentTime) {
+            let processedText = rawText;
+            const pauseDuration = currentTime - lastResultTime;
+            
+            if (lastResultTime === 0) {
+                lastResultTime = currentTime;
+                return processedText;
+            }
+
+            // 短停顿（500ms-1500ms）→ 逗号
+            if (pauseDuration >= 500 && pauseDuration < 1500) {
+                if (!/[，。？！；：\n]$/.test(processedText)) {
+                    processedText += '，';
+                }
+            }
+            // 长停顿（≥1500ms）→ 句号
+            else if (pauseDuration >= 1500) {
+                if (!/[，。？！；：\n]$/.test(processedText)) {
+                    processedText += '。';
+                }
+            }
+
+            lastResultTime = currentTime;
+            return processedText;
+        }
+
+        // 最终文本处理：清理重复标点+补全结尾（逻辑不变）
+        function finalizeTranscript(text) {
+            if (!text) return '';
+            
+            let finalText = text.replace(/，+/g, '，')
+                               .replace(/。+/g, '。')
+                               .replace(/，。/g, '。')
+                               .replace(/\n+/g, '\n');
+
+            if (finalText && !/[。？！；：\n]$/.test(finalText)) {
+                finalText += '。';
+            }
+
+            return finalText;
+        }
+
+        function checkEnv() {
+            const isFileProtocol = window.location.protocol === 'file:';
+            if (isFileProtocol) {
+                envTip.innerHTML = '📢 语音输入提示：<br>1. 电脑端本地文件可能限制麦克风，建议用http服务器打开；<br>2. 无需说标点！停顿短加逗号，停顿长加句号；<br>3. 说完手动点击停止，标点更精准';
+                envTip.style.background = '#fff3cd';
+                envTip.style.color = '#856404';
+            }
+        }
+
+        // 修复点1：重构初始化函数，强化浏览器兼容
+        function initVoiceRecognition() {
+            if (recognition) return; // 已初始化则直接返回
+
+            if (!SpeechRecognition) {
+                voiceStatus.className = 'error';
+                voiceStatus.textContent = '❌ 当前浏览器不支持语音输入（建议用Chrome/Edge）';
+                voiceInputBtn.disabled = true;
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'zh-CN';
+            recognition.continuous = true;        // 强制持续识别（关键）
+            recognition.interimResults = true;     // 实时返回临时结果（关键）
+            recognition.maxAlternatives = 1;
+            recognition.onerror = (event) => handleRecognitionError(event);
+            recognition.onresult = (event) => handleRecognitionResult(event);
+            recognition.onstart = handleRecognitionStart;
+            recognition.onend = handleRecognitionEnd;
+
+            // 修复点2：增加全浏览器兼容的超时配置（解决自动停止核心）
+            if (recognition.hasOwnProperty('speechInputCompleteTimeout')) {
+                recognition.speechInputCompleteTimeout = 30000; // 延长到30秒无语音才超时
+            }
+            if (recognition.hasOwnProperty('speechDetectionTimeout')) {
+                recognition.speechDetectionTimeout = 30000; // 延长到30秒未检测到语音才超时
+            }
+            if (recognition.hasOwnProperty('continuous')) {
+                recognition.continuous = true; // 再次强制开启持续识别
+            }
+        }
+
+        // 修复点3：拆分事件处理函数，状态更清晰
+        function handleRecognitionStart() {
+            permissionGranted = true;
+            isRecording = true;
+            isRestarting = false; // 重启状态重置
+            tempTranscript = '';
+            lastResultTime = 0;
+            voiceInputBtn.classList.add('recording');
+            voiceInputBtn.textContent = '🎙️ 正在录音...';
+            voiceStatus.className = '';
+            voiceStatus.textContent = '✅ 正在倾听，正常说话即可（停顿自动加标点）';
+        }
+
+        function handleRecognitionResult(event) {
+            const currentTime = new Date().getTime();
+            let currentTranscript = '';
+
+            // 拼接所有识别结果（兼容多段识别）
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                if (event.results[i].isFinal) { // 只处理最终识别结果，避免重复
+                    currentTranscript += event.results[i][0].transcript.trim();
+                }
+            }
+
+            // 只处理新内容（避免重复加标点）
+            if (currentTranscript && currentTranscript !== tempTranscript) {
+                tempTranscript = addPunctuationByPause(currentTranscript, currentTime);
+                voiceStatus.textContent = `✅ 正在识别：${tempTranscript}（无需说标点）`;
+            }
+        }
+
+        // 修复点4：强化onend事件，确保自动重启不中断
+        function handleRecognitionEnd() {
+            // 如果是「正在录音」状态，自动重启识别（核心修复）
+            if (isRecording && permissionGranted && !isRestarting) {
+                isRestarting = true; // 标记重启中，避免重复
+                setTimeout(() => {
+                    try {
+                        recognition.start();
+                        isRestarting = false;
+                        voiceStatus.textContent = '✅ 继续倾听中，正常说话即可...';
+                    } catch (err) {
+                        isRestarting = false;
+                        voiceStatus.className = 'error';
+                        voiceStatus.textContent = `❌ 重启识别失败：${err.message}`;
+                    }
+                }, 300); // 延迟300ms重启，避免浏览器阻塞
+                return;
+            }
+
+            // 手动停止的情况：处理最终结果
+            if (!isRecording) {
+                const finalText = finalizeTranscript(tempTranscript);
+                if (finalText) {
+                    const currentContent = logContent.value.trim();
+                    logContent.value = currentContent + (currentContent ? ' ' : '') + finalText;
+                    voiceStatus.textContent = `✅ 识别完成：${finalText}`;
+                } else {
+                    voiceStatus.textContent = '🔴 录音已停止，未识别到内容';
+                }
+                // 重置所有状态
+                voiceInputBtn.classList.remove('recording');
+                voiceInputBtn.textContent = '🎙️ 语音输入';
+                permissionGranted = false;
+                tempTranscript = '';
+                lastResultTime = 0;
+            }
+        }
+
+        // 修复点5：完善错误处理，避免状态错乱
+        function handleRecognitionError(event) {
+            // 保留已识别的内容
+            const errorText = finalizeTranscript(tempTranscript);
+            if (errorText) {
+                logContent.value = logContent.value + errorText + ' ';
+                voiceStatus.textContent = `✅ 识别到部分内容：${errorText}（因${event.error}暂停）`;
+            }
+
+            // 错误后仅重置状态，不终止录音（除非是权限问题）
+            isRestarting = false;
+            if (event.error === 'not-allowed') {
+                isRecording = false;
+                permissionGranted = false;
+                voiceInputBtn.classList.remove('recording');
+                voiceInputBtn.textContent = '🎙️ 语音输入';
+                voiceStatus.className = 'error';
+                voiceStatus.textContent = window.location.protocol === 'file:' 
+                    ? '❌ 本地文件无法获取麦克风权限！建议用http服务器打开'
+                    : '❌ 麦克风权限被拒绝！请在地址栏左侧🔒图标中开启';
+            } else if (event.error === 'no-speech') {
+                // 无语音时仅提示，不停止录音
+                voiceStatus.textContent = '⚠️ 暂时未检测到语音，请继续说话（持续倾听中）';
+                if (isRecording && permissionGranted) {
+                    setTimeout(() => recognition.start(), 300); // 重启识别
+                }
+            } else {
+                voiceStatus.className = 'error';
+                voiceStatus.textContent = `❌ 识别异常：${event.error}（已保存部分内容）`;
+                // 非致命错误，尝试重启
+                if (isRecording && permissionGranted) {
+                    setTimeout(() => recognition.start(), 500);
+                }
+            }
+        }
+
+        // 修复点6：重构点击事件，异步处理更稳定
+        voiceInputBtn.addEventListener('click', async () => {
+            // 初始化识别实例（首次点击才初始化）
+            if (!recognition) {
+                initVoiceRecognition();
+                if (!recognition) return; // 初始化失败则退出
+            }
+
+            // 正在录音 → 手动停止
+            if (isRecording) {
+                isRecording = false; // 先标记停止，再调用stop
+                recognition.stop();
+                voiceStatus.textContent = '🔄 正在整理识别结果...';
+                return;
+            }
+
+            // 未录音 → 开始录音
+            voiceStatus.className = '';
+            voiceStatus.textContent = '🔄 正在请求麦克风权限...';
+            try {
+                // 重置所有状态
+                permissionGranted = false;
+                tempTranscript = '';
+                lastResultTime = 0;
+                isRestarting = false;
+                // 启动识别（兼容异步）
+                await recognition.start();
+            } catch (err) {
+                voiceStatus.className = 'error';
+                if (err.message.includes('not-allowed')) {
+                    voiceStatus.textContent = '❌ 权限请求失败！请在浏览器设置中开启麦克风权限';
+                } else {
+                    voiceStatus.textContent = `❌ 启动录音失败：${err.message}`;
+                }
+                isRecording = false;
+            }
+        });
+
+        // ========== 原有功能（完全保留） ==========
+        function publishLog() {
+            const title = logTitle.value.trim();
+            const content = logContent.value.trim();
+            const tagsStr = logTags.value.trim();
+            
+            if (!title || !content) {
+                alert('标题和内容不能为空！');
+                return;
+            }
+
+            const tags = tagsStr ? tagsStr.split(',').map(tag => tag.trim()) : [];
+            const now = new Date();
+            const newLog = {
+                title: title,
+                content: content,
+                tags: tags,
+                time: now.toLocaleString(),
+                date: now.toISOString().split('T')[0]
+            };
+
+            logs.unshift(newLog);
+            localStorage.setItem('personalBlogLogs', JSON.stringify(logs));
+
+            logTitle.value = '';
+            logContent.value = '';
+            logTags.value = '';
+
+            renderLogs(logs);
+            renderTags();
+            alert('日志发布成功！');
+        }
+
+        function filterLogsByDate() {
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            if (!startDate && !endDate) {
+                renderLogs(logs);
+                return;
+            }
+
+            const filteredLogs = logs.filter(log => {
+                const logDate = log.date;
+                if (startDate && !endDate) {
+                    return logDate === startDate;
+                } else if (!startDate && endDate) {
+                    return logDate === endDate;
+                } else {
+                    return logDate >= startDate && logDate <= endDate;
+                }
+            });
+
+            renderLogs(filteredLogs);
+        }
+
+        function renderTags() {
+            const allTags = [...new Set(logs.flatMap(log => log.tags))];
+            tagList.innerHTML = '';
+            allTags.forEach(tag => {
+                const tagItem = document.createElement('div');
+                tagItem.className = 'tag-item';
+                tagItem.textContent = tag;
+                tagItem.addEventListener('click', () => {
+                    document.querySelectorAll('.tag-item').forEach(item => item.classList.remove('active'));
+                    tagItem.classList.add('active');
+                    const filteredLogs = logs.filter(log => log.tags.includes(tag));
+                    renderLogs(filteredLogs);
+                });
+                tagList.appendChild(tagItem);
+            });
+        }
+
+        function searchLogs() {
+            const keyword = searchInput.value.trim().toLowerCase();
+            if (!keyword) {
+                renderLogs(logs);
+                return;
+            }
+            const filteredLogs = logs.filter(log => {
+                const titleMatch = log.title.toLowerCase().includes(keyword);
+                const contentMatch = log.content.toLowerCase().includes(keyword);
+                return titleMatch || contentMatch;
+            });
+            renderLogs(filteredLogs);
+        }
+
+        function renderLogs(logsToRender) {
+            if (logsToRender.length === 0) {
+                logsList.innerHTML = '<div class="no-result">暂无日志数据</div>';
+                return;
+            }
+
+            let logsHtml = '';
+            logsToRender.forEach(log => {
+                logsHtml += `
+                    <div class="log-item">
+                        <h3>${log.title}</h3>
+                        <div class="log-tags">标签：${log.tags.join('、') || '无'}</div>
+                        <div class="log-content">${log.content}</div>
+                        <div class="log-time">发布时间：${log.time}</div>
+                    </div>
+                `;
+            });
+            logsList.innerHTML = logsHtml;
+        }
+
+        // 绑定事件
+        publishBtn.addEventListener('click', publishLog);
+        dateSearchBtn.addEventListener('click', filterLogsByDate);
+        searchBtn.addEventListener('click', searchLogs);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchLogs();
+        });
+
+        // 页面加载初始化
+        window.addEventListener('load', () => {
+            checkEnv();
+            // 提前初始化（但不启动），避免首次点击延迟
+            initVoiceRecognition();
+            renderLogs(logs);
+            renderTags();
+        });
+    </script>
+</body>
+</html>
