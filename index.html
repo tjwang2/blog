@@ -159,12 +159,7 @@
             line-height: 1.5;
         }
 
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        #publish-btn, #edit-confirm-btn {
+        #publish-btn {
             background: #007bff;
             color: white;
             border: none;
@@ -174,27 +169,8 @@
             font-size: 1rem;
         }
 
-        #edit-confirm-btn {
-            display: none;
-        }
-
-        #publish-btn:hover, #edit-confirm-btn:hover {
+        #publish-btn:hover {
             background: #0056b3;
-        }
-
-        #cancel-edit-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            display: none;
-        }
-
-        #cancel-edit-btn:hover {
-            background: #5a6268;
         }
 
         .voice-btn {
@@ -271,40 +247,6 @@
             white-space: pre-line;
         }
 
-        .log-item .log-actions {
-            display: flex;
-            gap: 10px;
-            margin: 10px 0;
-        }
-
-        .edit-btn {
-            padding: 4px 10px;
-            background: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .edit-btn:hover {
-            background: #138496;
-        }
-
-        .delete-btn {
-            padding: 4px 10px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .delete-btn:hover {
-            background: #c82333;
-        }
-
         .log-item .log-time {
             color: #999;
             font-size: 0.85rem;
@@ -373,11 +315,7 @@
                 <label for="log-tags">日志标签（多个标签用逗号分隔）</label>
                 <input type="text" id="log-tags" placeholder="例如：生活,学习,工作...">
             </div>
-            <div class="btn-group">
-                <button id="publish-btn">发布日志</button>
-                <button id="edit-confirm-btn">确认修改</button>
-                <button id="cancel-edit-btn">取消编辑</button>
-            </div>
+            <button id="publish-btn">发布日志</button>
         </div>
 
         <div class="logs-area">
@@ -388,17 +326,14 @@
 
     <script>
         // ========== 只需要修改这里的两个配置项！！！ ==========
-        const GIST_ID = 'a8feba015333301cbde31c1c09099930'; // 替换成你的Gist ID
-        const GITHUB_TOKEN = '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'; // 替换成你的GitHub Token
+        const GIST_ID = 'da19e701ffe11b272fdf90f3d7051d1a'; // 第一步：替换成你的Gist ID
+        const GITHUB_TOKEN = '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'; // 第二步：替换成你的GitHub Token
         const GIST_FILE_NAME = 'blog-logs.json';
         // ========== 配置项结束 ==========
 
         // 全局变量
         let logs = [];
-        let editingIndex = -1; // 标记当前编辑的日志索引，-1表示未编辑
         const publishBtn = document.getElementById('publish-btn');
-        const editConfirmBtn = document.getElementById('edit-confirm-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
         const logTitle = document.getElementById('log-title');
         const logContent = document.getElementById('log-content');
         const logTags = document.getElementById('log-tags');
@@ -418,7 +353,7 @@
         async function fetchLogsFromGist() {
             try {
                 // 检查配置是否填写
-                if (!GIST_ID || GIST_ID === 'a8feba015333301cbde31c1c09099930' || !GITHUB_TOKEN || GITHUB_TOKEN === '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') {
+                if (!GIST_ID || GIST_ID === '替换成你的Gist ID' || !GITHUB_TOKEN || GITHUB_TOKEN === '替换成你的GitHub Token') {
                     throw new Error('请先填写Gist ID和GitHub Token配置项');
                 }
 
@@ -466,7 +401,7 @@
         async function saveLogsToGist(logs) {
             try {
                 // 检查配置是否填写
-                if (!GIST_ID || GIST_ID === 'a8feba015333301cbde31c1c09099930' || !GITHUB_TOKEN || GITHUB_TOKEN === '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') {
+                if (!GIST_ID || GIST_ID === '替换成你的Gist ID' || !GITHUB_TOKEN || GITHUB_TOKEN === '替换成你的GitHub Token') {
                     throw new Error('请先填写Gist ID和GitHub Token配置项');
                 }
 
@@ -514,7 +449,7 @@
                 console.error('保存到Gist失败:', err);
                 // 降级保存到本地
                 localStorage.setItem('personalBlogLogs', JSON.stringify(logs));
-                alert(`同步到GitHub失败：${err.message}\n日志已保存到本地，请检查配置后重新操作`);
+                alert(`同步到GitHub失败：${err.message}\n日志已保存到本地，请检查配置后重新发布`);
                 return false;
             }
         }
@@ -738,107 +673,14 @@
                 return;
             }
 
-            logsList.innerHTML = logsToRender.map((log, index) => `
+            logsList.innerHTML = logsToRender.map(log => `
                 <div class="log-item">
                     <h3>${log.title}</h3>
                     <div class="log-tags">标签：${log.tags.length > 0 ? log.tags.join('，') : '无'}</div>
                     <div class="log-content">${log.content}</div>
-                    <div class="log-actions">
-                        <button class="edit-btn" data-index="${index}">编辑</button>
-                        <button class="delete-btn" data-index="${index}">删除</button>
-                    </div>
                     <div class="log-time">发布时间：${log.time}</div>
                 </div>
             `).join('');
-
-            // 绑定编辑和删除按钮事件
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const index = parseInt(btn.dataset.index);
-                    enterEditMode(index);
-                });
-            });
-
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    const index = parseInt(btn.dataset.index);
-                    if (confirm(`确定要删除《${logs[index].title}》这篇日志吗？`)) {
-                        // 删除对应日志
-                        logs.splice(index, 1);
-                        // 保存到Gist
-                        const saveSuccess = await saveLogsToGist(logs);
-                        // 重新渲染
-                        renderLogs(logs);
-                        renderTags();
-                        if (saveSuccess) {
-                            alert('日志删除成功！已同步到GitHub Gist');
-                        }
-                    }
-                });
-            });
-        }
-
-        // 进入编辑模式
-        function enterEditMode(index) {
-            editingIndex = index;
-            const logToEdit = logs[index];
-            // 填充表单
-            logTitle.value = logToEdit.title;
-            logContent.value = logToEdit.content;
-            logTags.value = logToEdit.tags.join(',');
-            // 切换按钮显示
-            publishBtn.style.display = 'none';
-            editConfirmBtn.style.display = 'block';
-            cancelEditBtn.style.display = 'block';
-            // 滚动到表单区域
-            document.querySelector('.form-area').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // 取消编辑
-        function cancelEdit() {
-            editingIndex = -1;
-            // 清空表单
-            logTitle.value = '';
-            logContent.value = '';
-            logTags.value = '';
-            // 切换按钮显示
-            publishBtn.style.display = 'block';
-            editConfirmBtn.style.display = 'none';
-            cancelEditBtn.style.display = 'none';
-        }
-
-        // 确认编辑修改
-        async function confirmEdit() {
-            const title = logTitle.value.trim();
-            const content = logContent.value.trim();
-            const tagsStr = logTags.value.trim();
-            
-            if (!title || !content) {
-                alert('标题和内容不能为空！');
-                return;
-            }
-
-            const tags = tagsStr ? tagsStr.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
-            // 更新日志内容（保留原发布时间）
-            logs[editingIndex] = {
-                ...logs[editingIndex],
-                title: title,
-                content: content,
-                tags: tags
-            };
-
-            // 保存到Gist
-            const saveSuccess = await saveLogsToGist(logs);
-            
-            // 退出编辑模式
-            cancelEdit();
-            // 重新渲染
-            renderLogs(logs);
-            renderTags();
-            
-            if (saveSuccess) {
-                alert('日志修改成功！已同步到GitHub Gist');
-            }
         }
 
         // 渲染标签列表
@@ -937,10 +779,6 @@
                 alert('日志发布成功！已同步到GitHub Gist，跨设备都能看到');
             }
         });
-
-        // 绑定编辑相关按钮事件
-        editConfirmBtn.addEventListener('click', confirmEdit);
-        cancelEditBtn.addEventListener('click', cancelEdit);
 
         // ========== 页面初始化 ==========
         window.addEventListener('load', async () => {
