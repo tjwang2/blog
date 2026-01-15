@@ -127,6 +127,95 @@
             background: #218838;
         }
 
+        /* 新增：导出按钮样式 */
+        .export-area {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        #export-btn {
+            padding: 10px 20px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #export-btn:hover {
+            background: #138496;
+        }
+
+        /* 新增：导出格式选择弹窗 */
+        .export-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .export-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .export-modal-content h3 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .export-format-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .export-format-item input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .export-modal-btns {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .export-confirm-btn {
+            padding: 8px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .export-cancel-btn {
+            padding: 8px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
         .form-area {
             background: #f8f9fa;
             padding: 20px;
@@ -335,6 +424,11 @@
             line-height: 1.5;
         }
     </style>
+    <!-- 引入导出所需第三方库 -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epub-gen@0.1.19/dist/epub-gen.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -359,6 +453,34 @@
         <div class="search-area">
             <input type="text" id="search-input" placeholder="输入关键词检索日志（标题/正文）...">
             <button id="search-btn">全文检索</button>
+        </div>
+
+        <!-- 新增：导出按钮区域 -->
+        <div class="export-area">
+            <button id="export-btn">📤 一键导出</button>
+        </div>
+
+        <!-- 新增：导出格式选择弹窗 -->
+        <div class="export-modal" id="export-modal">
+            <div class="export-modal-content">
+                <h3>选择导出格式</h3>
+                <div class="export-format-item">
+                    <input type="radio" name="export-format" id="format-txt" value="txt" checked>
+                    <label for="format-txt">TXT 纯文本</label>
+                </div>
+                <div class="export-format-item">
+                    <input type="radio" name="export-format" id="format-pdf" value="pdf">
+                    <label for="format-pdf">PDF 文档（目录不可点击）</label>
+                </div>
+                <div class="export-format-item">
+                    <input type="radio" name="export-format" id="format-epub" value="epub">
+                    <label for="format-epub">EPUB 电子书（目录可点击）</label>
+                </div>
+                <div class="export-modal-btns">
+                    <button class="export-confirm-btn" id="export-confirm-btn">确认导出</button>
+                    <button class="export-cancel-btn" id="export-cancel-btn">取消</button>
+                </div>
+            </div>
         </div>
 
         <div class="form-area">
@@ -419,6 +541,15 @@
         const voiceStatus = document.getElementById('voice-status');
         const envTip = document.getElementById('env-tip');
 
+        // 新增：导出相关DOM
+        const exportBtn = document.getElementById('export-btn');
+        const exportModal = document.getElementById('export-modal');
+        const exportConfirmBtn = document.getElementById('export-confirm-btn');
+        const exportCancelBtn = document.getElementById('export-cancel-btn');
+
+        // 新增：当前渲染的日志（用于导出）
+        let currentRenderedLogs = logs;
+
         // 新增：当前编辑的日志索引
         let editingIndex = -1;
 
@@ -472,7 +603,7 @@
         function checkEnv() {
             const isFileProtocol = window.location.protocol === 'file:';
             if (isFileProtocol) {
-                envTip.innerHTML = '📢 语音输入提示：<br>1. 电脑端本地文件可能限制麦克风，建议用http服务器打开；<br>2. 无需说标点！停顿短加逗号，停顿长加句号；<br>3. 说完手动点击停止，标点更精准';
+                envTip.innerHTML = '📢 语音输入提示：<br>1. 电脑端建议用Chrome/Edge浏览器；<br>2. 无需说标点！停顿短加逗号，停顿长加句号；<br>3. 说完手动点击停止，标点更精准';
                 envTip.style.background = '#fff3cd';
                 envTip.style.color = '#856404';
             }
@@ -777,8 +908,11 @@
             renderLogs(filteredLogs);
         }
 
-        // 优化渲染函数：添加编辑/删除按钮
+        // 优化渲染函数：添加编辑/删除按钮 + 记录当前渲染的日志
         function renderLogs(logsToRender) {
+            // 更新当前渲染的日志（用于导出）
+            currentRenderedLogs = logsToRender;
+            
             if (logsToRender.length === 0) {
                 logsList.innerHTML = '<div class="no-result">暂无日志数据</div>';
                 return;
@@ -806,6 +940,180 @@
                 `;
             });
             logsList.innerHTML = logsHtml;
+        }
+
+        // ========== 新增：导出功能核心逻辑 ==========
+        // 打开导出弹窗
+        exportBtn.addEventListener('click', () => {
+            if (currentRenderedLogs.length === 0) {
+                alert('暂无可导出的日志数据！');
+                return;
+            }
+            exportModal.style.display = 'flex';
+        });
+
+        // 关闭导出弹窗
+        exportCancelBtn.addEventListener('click', () => {
+            exportModal.style.display = 'none';
+        });
+
+        // 点击弹窗外部关闭
+        exportModal.addEventListener('click', (e) => {
+            if (e.target === exportModal) {
+                exportModal.style.display = 'none';
+            }
+        });
+
+        // 确认导出
+        exportConfirmBtn.addEventListener('click', () => {
+            const selectedFormat = document.querySelector('input[name="export-format"]:checked').value;
+            exportModal.style.display = 'none';
+            
+            switch (selectedFormat) {
+                case 'txt':
+                    exportAsTXT();
+                    break;
+                case 'pdf':
+                    exportAsPDF();
+                    break;
+                case 'epub':
+                    exportAsEPUB();
+                    break;
+            }
+        });
+
+        // 导出为TXT
+        function exportAsTXT() {
+            // 构建内容：先目录，后正文
+            let content = '===== 日志目录 =====\n';
+            currentRenderedLogs.forEach((log, index) => {
+                content += `${index + 1}. ${log.title}\n`;
+            });
+
+            content += '\n===== 日志正文 =====\n\n';
+            currentRenderedLogs.forEach((log, index) => {
+                content += `【${index + 1}】${log.title}\n`;
+                content += `标签：${log.tags.join('、') || '无'}\n`;
+                content += `发布时间：${log.time}\n`;
+                content += `内容：\n${log.content}\n\n`;
+                content += '-------------------------\n\n';
+            });
+
+            // 生成文件并下载
+            const blob = new Blob([content], { type: 'text/plain; charset=utf-8' });
+            saveAs(blob, `我的博客日志_${new Date().toLocaleDateString()}.txt`);
+        }
+
+        // 导出为PDF（目录不可点击，前端轻量方案限制）
+        function exportAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // 设置字体（解决中文显示问题）
+            pdf.setFont('simhei', 'normal');
+            pdf.setFontSize(16);
+            pdf.text('我的博客日志', 95, 20, { align: 'center' });
+
+            // 目录部分
+            pdf.setFontSize(14);
+            pdf.text('===== 日志目录 =====', 20, 40);
+            let yPos = 50;
+            currentRenderedLogs.forEach((log, index) => {
+                if (yPos > 280) { // 分页
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                pdf.text(`${index + 1}. ${log.title}`, 25, yPos);
+                yPos += 10;
+            });
+
+            // 正文部分
+            pdf.addPage();
+            pdf.setFontSize(14);
+            pdf.text('===== 日志正文 =====', 20, 20);
+            yPos = 30;
+
+            currentRenderedLogs.forEach((log, index) => {
+                if (yPos > 280) {
+                    pdf.addPage();
+                    yPos = 20;
+                }
+                // 标题
+                pdf.setFontSize(12);
+                pdf.text(`【${index + 1}】${log.title}`, 20, yPos);
+                yPos += 8;
+                // 标签和时间
+                pdf.setFontSize(10);
+                pdf.text(`标签：${log.tags.join('、') || '无'} | 发布时间：${log.time}`, 20, yPos);
+                yPos += 8;
+                // 内容（分行处理）
+                pdf.setFontSize(10);
+                const contentLines = pdf.splitTextToSize(log.content, 170); // 宽度170mm
+                pdf.text(contentLines, 20, yPos);
+                yPos += contentLines.length * 6 + 10; // 行高6mm，间距10mm
+                // 分隔线
+                pdf.setLineWidth(0.1);
+                pdf.line(20, yPos, 190, yPos);
+                yPos += 10;
+            });
+
+            // 下载PDF
+            pdf.save(`我的博客日志_${new Date().toLocaleDateString()}.pdf`);
+        }
+
+        // 导出为EPUB（目录可点击）
+        function exportAsEPUB() {
+            // 构建EPUB结构：目录+正文
+            const epubOptions = {
+                title: `我的博客日志_${new Date().toLocaleDateString()}`,
+                author: '个人博客',
+                publisher: '个人博客系统',
+                lang: 'zh-CN',
+                content: []
+            };
+
+            // 第一步：添加目录页
+            let tocContent = '<h1>日志目录</h1><ul>';
+            currentRenderedLogs.forEach((log, index) => {
+                tocContent += `<li><a href="#log-${index}">${index + 1}. ${log.title}</a></li>`;
+            });
+            tocContent += '</ul>';
+
+            epubOptions.content.push({
+                title: '目录',
+                data: tocContent
+            });
+
+            // 第二步：添加每个日志的正文页（带锚点）
+            currentRenderedLogs.forEach((log, index) => {
+                const logContent = `
+                    <div id="log-${index}">
+                        <h2>${index + 1}. ${log.title}</h2>
+                        <p><strong>标签：</strong>${log.tags.join('、') || '无'}</p>
+                        <p><strong>发布时间：</strong>${log.time}</p>
+                        <div style="margin-top: 20px; line-height: 1.8;">${log.content.replace(/\n/g, '<br>')}</div>
+                    </div>
+                    <hr style="margin: 30px 0;">
+                `;
+
+                epubOptions.content.push({
+                    title: log.title,
+                    data: logContent
+                });
+            });
+
+            // 生成EPUB并下载
+            const epubGenerator = new EpubGen(epubOptions);
+            epubGenerator.generateEPUB().then((epubBlob) => {
+                saveAs(epubBlob, `我的博客日志_${new Date().toLocaleDateString()}.epub`);
+            }).catch((err) => {
+                alert(`EPUB导出失败：${err.message}`);
+                console.error(err);
+            });
         }
 
         // 绑定事件（新增取消编辑按钮事件）
