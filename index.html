@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的个人博客</title>
     <style>
-        /* 原有样式完全保留，新增编辑/删除按钮样式 */
+        /* 原有样式保留，移除语音输入相关样式 */
         * {
             margin: 0;
             padding: 0;
@@ -13,10 +13,28 @@
             font-family: "Microsoft YaHei", Arial, sans-serif;
         }
 
+        /* 页面全屏适配核心样式 */
+        body {
+            width: 100vw;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+
         .container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 0 20px;
+            width: 100%; /* 撑满宽度 */
+            max-width: 100%; /* 取消最大宽度限制 */
+            margin: 0 auto;
+            padding: 20px; /* 保留内边距避免内容贴边 */
+        }
+
+        /* 大屏设备优化（宽度>1200px时） */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1200px; /* 大屏下限制最大宽度避免内容过宽 */
+                padding: 20px 0;
+            }
         }
 
         h1 {
@@ -27,25 +45,51 @@
             border-bottom: 1px solid #eee;
         }
 
-        .calendar-area {
+        /* 重构顶部筛选区域 - 两列布局 */
+        .top-filter-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
             background: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%; /* 确保撑满容器 */
         }
 
-        .calendar-area h3 {
-            color: #555;
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
-
-        .date-range {
+        /* 左列：日期筛选 */
+        .filter-col-left {
+            flex: 1;
+            min-width: 280px;
             display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* 右列：搜索+导出 */
+        .filter-col-right {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-col-title {
+            color: #555;
+            font-size: 1rem;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* 日期筛选行 */
+        .date-filter-row {
+            display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
+            width: 100%;
         }
 
         .date-input {
@@ -53,11 +97,14 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 0.9rem;
+            flex: 1;
+            min-width: 120px;
         }
 
         .range-text {
             color: #666;
             font-size: 0.9rem;
+            white-space: nowrap;
         }
 
         #date-search-btn {
@@ -69,10 +116,62 @@
             cursor: pointer;
             font-size: 0.9rem;
             white-space: nowrap;
+            min-width: 80px;
+        }
+
+        /* 搜索+导出行 */
+        .search-export-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+
+        #search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            min-width: 180px;
+        }
+
+        #search-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            min-width: 100px;
+        }
+
+        #search-btn:hover {
+            background: #218838;
+        }
+
+        #export-btn {
+            padding: 8px 16px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            min-width: 100px;
+        }
+
+        #export-btn:hover {
+            background: #138496;
         }
 
         .tags-area {
             margin-bottom: 20px;
+            width: 100%;
         }
 
         .tags-area h3 {
@@ -98,56 +197,7 @@
             color: white;
         }
 
-        .search-area {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        #search-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        #search-btn {
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        #search-btn:hover {
-            background: #218838;
-        }
-
-        /* 新增：导出按钮样式 */
-        .export-area {
-            margin-bottom: 20px;
-            text-align: right;
-        }
-
-        #export-btn {
-            padding: 10px 20px;
-            background: #17a2b8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        #export-btn:hover {
-            background: #138496;
-        }
-
-        /* 新增：导出格式选择弹窗 */
+        /* 导出格式选择弹窗 */
         .export-modal {
             position: fixed;
             top: 0;
@@ -222,6 +272,7 @@
             border-radius: 8px;
             margin-bottom: 30px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%; /* 确保表单撑满宽度 */
         }
 
         .form-group {
@@ -263,44 +314,39 @@
             background: #0056b3;
         }
 
-        .voice-btn {
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            padding: 8px 16px;
+        .edit-tip {
+            color: #ffc107;
+            font-weight: 500;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: #fff8e1;
             border-radius: 4px;
-            font-size: 0.9rem;
+        }
+
+        #cancel-edit-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .voice-btn:hover {
-            background: #eee;
-        }
-
-        .voice-btn.recording {
-            background: #fef2f2;
-            color: #dc2626;
-            border-color: #fecdd3;
-        }
-
-        #voice-status {
-            font-size: 0.85rem;
+            font-size: 1rem;
             margin-left: 10px;
+        }
+
+        #cancel-edit-btn:hover {
+            background: #5a6268;
+        }
+
+        .no-result {
+            text-align: center;
             color: #999;
-            vertical-align: middle;
+            padding: 10px 20px;
+            font-size: 1rem;
         }
 
-        .voice-status.error {
-            color: #dc2626;
-            font-weight: 500;
-        }
-
-        .voice-status.tip {
-            color: #007bff;
-            font-weight: 500;
+        .logs-area {
+            width: 100%;
         }
 
         .logs-area h2 {
@@ -317,35 +363,44 @@
             margin-bottom: 15px;
             background: white;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            position: relative; /* 新增：为编辑/删除按钮定位 */
+            position: relative;
+            width: 100%;
         }
 
+        /* 墨水屏适配 - 日志标题加粗加黑 */
         .log-item h3 {
-            color: #007bff;
+            color: #000;
+            font-weight: 900; /* 加粗加黑 */
             margin-bottom: 8px;
         }
 
+        /* 墨水屏适配 - 标签文字加粗 */
         .log-item .log-tags {
-            color: #888;
+            color: #000;
+            font-weight: bold;
             font-size: 0.9rem;
             margin-bottom: 8px;
         }
 
+        /* 墨水屏适配 - 正文加粗+1.5倍行距 */
         .log-item .log-content {
-            color: #555;
-            line-height: 1.8;
+            color: #000;
+            font-weight: bold; /* 加粗 */
+            line-height: 1.5; /* 1.5倍行距 */
             margin: 10px 0;
             white-space: pre-line;
         }
 
+        /* 墨水屏适配 - 时间文字加粗 */
         .log-item .log-time {
-            color: #999;
+            color: #000;
+            font-weight: bold;
             font-size: 0.85rem;
             text-align: right;
             margin-top: 10px;
         }
 
-        /* 新增：编辑/删除按钮样式 */
+        /* 编辑/删除按钮样式 */
         .log-actions {
             position: absolute;
             top: 15px;
@@ -381,52 +436,9 @@
         .delete-btn:hover {
             background: #e55361;
         }
-
-        /* 新增：编辑状态样式 */
-        .form-area .edit-tip {
-            color: #ffc107;
-            font-weight: 500;
-            margin-bottom: 15px;
-            padding: 8px;
-            background: #fff8e1;
-            border-radius: 4px;
-        }
-
-        #cancel-edit-btn {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-left: 10px;
-        }
-
-        #cancel-edit-btn:hover {
-            background: #5a6268;
-        }
-
-        .no-result {
-            text-align: center;
-            color: #999;
-            padding: 10px 20px;
-            font-size: 1rem;
-        }
-
-        .env-tip {
-            background: #e7f3ff;
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-            color: #0c5460;
-            line-height: 1.5;
-        }
     </style>
-    <!-- 引入导出所需第三方库 -->
+    <!-- 导出所需第三方库 -->
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/epub-gen@0.1.19/dist/epub-gen.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 </head>
@@ -434,33 +446,36 @@
     <div class="container">
         <h1>我的个人博客</h1>
 
-        <div class="calendar-area">
-            <h3>按日期/时间段查找日志</h3>
-            <div class="date-range">
-                <input type="date" id="start-date" class="date-input" placeholder="开始日期">
-                <span class="range-text">至</span>
-                <input type="date" id="end-date" class="date-input" placeholder="结束日期">
-                <button id="date-search-btn">查找</button>
+        <!-- 重构顶部筛选区域 - 两列布局 -->
+        <div class="top-filter-wrapper">
+            <!-- 左列：日期筛选 -->
+            <div class="filter-col-left">
+                <div class="filter-col-title">日志筛选</div>
+                <div class="date-filter-row">
+                    <input type="date" id="start-date" class="date-input" placeholder="开始日期">
+                    <span class="range-text">至</span>
+                    <input type="date" id="end-date" class="date-input" placeholder="结束日期">
+                    <button id="date-search-btn">查找</button>
+                </div>
+            </div>
+
+            <!-- 右列：搜索+导出 -->
+            <div class="filter-col-right">
+                <div class="filter-col-title">全文检索</div>
+                <div class="search-export-row">
+                    <input type="text" id="search-input" placeholder="输入关键词检索日志（标题/正文）...">
+                    <button id="search-btn">全文检索</button>
+                    <button id="export-btn">📤 一键导出</button>
+                </div>
             </div>
         </div>
 
         <div class="tags-area">
             <h3>按标签筛选日志</h3>
-            <div id="tag-list" class="tag-container">
-            </div>
+            <div id="tag-list" class="tag-container"></div>
         </div>
 
-        <div class="search-area">
-            <input type="text" id="search-input" placeholder="输入关键词检索日志（标题/正文）...">
-            <button id="search-btn">全文检索</button>
-        </div>
-
-        <!-- 新增：导出按钮区域 -->
-        <div class="export-area">
-            <button id="export-btn">📤 一键导出</button>
-        </div>
-
-        <!-- 新增：导出格式选择弹窗 -->
+        <!-- 导出格式选择弹窗 -->
         <div class="export-modal" id="export-modal">
             <div class="export-modal-content">
                 <h3>选择导出格式</h3>
@@ -485,9 +500,8 @@
 
         <div class="form-area">
             <h2>发布新日志</h2>
-            <!-- 新增：编辑提示 -->
+            <!-- 编辑提示 -->
             <div class="edit-tip" id="edit-tip" style="display: none;">📝 正在编辑日志，请修改后点击「更新日志」</div>
-            <div class="env-tip" id="env-tip">📢 语音输入提示：<br>1. 电脑端建议用Chrome/Edge浏览器；<br>2. 无需说标点！停顿短加逗号，停顿长加句号；<br>3. 说完手动点击停止，标点更精准</div>
             <div class="form-group">
                 <label for="log-title">日志标题</label>
                 <input type="text" id="log-title" placeholder="输入日志标题...">
@@ -495,17 +509,13 @@
             <div class="form-group">
                 <label for="log-content">日志内容</label>
                 <textarea id="log-content" placeholder="输入日志内容...（敲回车可分段）"></textarea>
-                <button type="button" id="voice-input-btn" class="voice-btn">
-                    🎙️ 语音输入
-                </button>
-                <span id="voice-status"></span>
             </div>
             <div class="form-group">
                 <label for="log-tags">日志标签（多个标签用逗号分隔）</label>
                 <input type="text" id="log-tags" placeholder="例如：生活,学习,工作...">
             </div>
             <button id="publish-btn">发布日志</button>
-            <!-- 新增：取消编辑按钮 -->
+            <!-- 取消编辑按钮 -->
             <button id="cancel-edit-btn" style="display: none;">取消编辑</button>
         </div>
 
@@ -516,17 +526,25 @@
     </div>
 
     <script>
-        let logs = JSON.parse(localStorage.getItem('personalBlogLogs')) || [];
-        logs = logs.map(log => ({ 
-            tags: [], 
-            time: log.time || new Date().toLocaleString(),
-            date: log.date || new Date(log.time || new Date()).toISOString().split('T')[0],
-            ...log 
-        }));
+        // localStorage读取添加容错
+        let logs = [];
+        try {
+            logs = JSON.parse(localStorage.getItem('personalBlogLogs')) || [];
+            logs = logs.map(log => ({ 
+                tags: [], 
+                time: log.time || new Date().toLocaleString(),
+                date: log.date || new Date(log.time || new Date()).toISOString().split('T')[0],
+                ...log 
+            }));
+        } catch (e) {
+            console.error('读取本地日志失败：', e);
+            logs = [];
+        }
 
+        // 核心DOM元素
         const publishBtn = document.getElementById('publish-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn'); // 新增
-        const editTip = document.getElementById('edit-tip'); // 新增
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const editTip = document.getElementById('edit-tip');
         const logTitle = document.getElementById('log-title');
         const logContent = document.getElementById('log-content');
         const logTags = document.getElementById('log-tags');
@@ -537,236 +555,20 @@
         const dateSearchBtn = document.getElementById('date-search-btn');
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
-        const voiceInputBtn = document.getElementById('voice-input-btn');
-        const voiceStatus = document.getElementById('voice-status');
-        const envTip = document.getElementById('env-tip');
 
-        // 新增：导出相关DOM
+        // 导出相关DOM
         const exportBtn = document.getElementById('export-btn');
         const exportModal = document.getElementById('export-modal');
         const exportConfirmBtn = document.getElementById('export-confirm-btn');
         const exportCancelBtn = document.getElementById('export-cancel-btn');
 
-        // 新增：当前渲染的日志（用于导出）
+        // 当前渲染的日志（用于导出）
         let currentRenderedLogs = logs;
-
-        // 新增：当前编辑的日志索引
+        // 当前编辑的日志索引
         let editingIndex = -1;
 
-        // ========== 智能语音输入（原有代码，无修改） ==========
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition = null;
-        let isRecording = false;       
-        let isRestarting = false;      
-        let permissionGranted = false; 
-        let tempTranscript = '';       
-        let lastResultTime = 0;        
-
-        function addPunctuationByPause(rawText, currentTime) {
-            let processedText = rawText;
-            const pauseDuration = currentTime - lastResultTime;
-            
-            if (lastResultTime === 0) {
-                lastResultTime = currentTime;
-                return processedText;
-            }
-
-            if (pauseDuration >= 500 && pauseDuration < 1500) {
-                if (!/[，。？！；：\n]$/.test(processedText)) {
-                    processedText += '，';
-                }
-            } else if (pauseDuration >= 1500) {
-                if (!/[，。？！；：\n]$/.test(processedText)) {
-                    processedText += '。';
-                }
-            }
-
-            lastResultTime = currentTime;
-            return processedText;
-        }
-
-        function finalizeTranscript(text) {
-            if (!text) return '';
-            
-            let finalText = text.replace(/，+/g, '，')
-                               .replace(/。+/g, '。')
-                               .replace(/，。/g, '。')
-                               .replace(/\n+/g, '\n');
-
-            if (finalText && !/[。？！；：\n]$/.test(finalText)) {
-                finalText += '。';
-            }
-
-            return finalText;
-        }
-
-        function checkEnv() {
-            const isFileProtocol = window.location.protocol === 'file:';
-            if (isFileProtocol) {
-                envTip.innerHTML = '📢 语音输入提示：<br>1. 电脑端建议用Chrome/Edge浏览器；<br>2. 无需说标点！停顿短加逗号，停顿长加句号；<br>3. 说完手动点击停止，标点更精准';
-                envTip.style.background = '#fff3cd';
-                envTip.style.color = '#856404';
-            }
-        }
-
-        function initVoiceRecognition() {
-            if (recognition) return;
-
-            if (!SpeechRecognition) {
-                voiceStatus.className = 'error';
-                voiceStatus.textContent = '❌ 当前浏览器不支持语音输入（建议用Chrome/Edge）';
-                voiceInputBtn.disabled = true;
-                return;
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.lang = 'zh-CN';
-            recognition.continuous = true;        
-            recognition.interimResults = true;     
-            recognition.maxAlternatives = 1;
-            recognition.onerror = (event) => handleRecognitionError(event);
-            recognition.onresult = (event) => handleRecognitionResult(event);
-            recognition.onstart = handleRecognitionStart;
-            recognition.onend = handleRecognitionEnd;
-
-            if (recognition.hasOwnProperty('speechInputCompleteTimeout')) {
-                recognition.speechInputCompleteTimeout = 30000;
-            }
-            if (recognition.hasOwnProperty('speechDetectionTimeout')) {
-                recognition.speechDetectionTimeout = 30000;
-            }
-            if (recognition.hasOwnProperty('continuous')) {
-                recognition.continuous = true;
-            }
-        }
-
-        function handleRecognitionStart() {
-            permissionGranted = true;
-            isRecording = true;
-            isRestarting = false;
-            tempTranscript = '';
-            lastResultTime = 0;
-            voiceInputBtn.classList.add('recording');
-            voiceInputBtn.textContent = '🎙️ 正在录音...';
-            voiceStatus.className = '';
-            voiceStatus.textContent = '✅ 正在倾听，正常说话即可（停顿自动加标点）';
-        }
-
-        function handleRecognitionResult(event) {
-            const currentTime = new Date().getTime();
-            let currentTranscript = '';
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                if (event.results[i].isFinal) {
-                    currentTranscript += event.results[i][0].transcript.trim();
-                }
-            }
-
-            if (currentTranscript && currentTranscript !== tempTranscript) {
-                tempTranscript = addPunctuationByPause(currentTranscript, currentTime);
-                voiceStatus.textContent = `✅ 正在识别：${tempTranscript}（无需说标点）`;
-            }
-        }
-
-        function handleRecognitionEnd() {
-            if (isRecording && permissionGranted && !isRestarting) {
-                isRestarting = true;
-                setTimeout(() => {
-                    try {
-                        recognition.start();
-                        isRestarting = false;
-                        voiceStatus.textContent = '✅ 继续倾听中，正常说话即可...';
-                    } catch (err) {
-                        isRestarting = false;
-                        voiceStatus.className = 'error';
-                        voiceStatus.textContent = `❌ 重启识别失败：${err.message}`;
-                    }
-                }, 300);
-                return;
-            }
-
-            if (!isRecording) {
-                const finalText = finalizeTranscript(tempTranscript);
-                if (finalText) {
-                    const currentContent = logContent.value.trim();
-                    logContent.value = currentContent + (currentContent ? ' ' : '') + finalText;
-                    voiceStatus.textContent = `✅ 识别完成：${finalText}`;
-                } else {
-                    voiceStatus.textContent = '🔴 录音已停止，未识别到内容';
-                }
-                voiceInputBtn.classList.remove('recording');
-                voiceInputBtn.textContent = '🎙️ 语音输入';
-                permissionGranted = false;
-                tempTranscript = '';
-                lastResultTime = 0;
-            }
-        }
-
-        function handleRecognitionError(event) {
-            const errorText = finalizeTranscript(tempTranscript);
-            if (errorText) {
-                logContent.value = logContent.value + errorText + ' ';
-                voiceStatus.textContent = `✅ 识别到部分内容：${errorText}（因${event.error}暂停）`;
-            }
-
-            isRestarting = false;
-            if (event.error === 'not-allowed') {
-                isRecording = false;
-                permissionGranted = false;
-                voiceInputBtn.classList.remove('recording');
-                voiceInputBtn.textContent = '🎙️ 语音输入';
-                voiceStatus.className = 'error';
-                voiceStatus.textContent = window.location.protocol === 'file:' 
-                    ? '❌ 本地文件无法获取麦克风权限！建议用http服务器打开'
-                    : '❌ 麦克风权限被拒绝！请在地址栏左侧🔒图标中开启';
-            } else if (event.error === 'no-speech') {
-                voiceStatus.textContent = '⚠️ 暂时未检测到语音，请继续说话（持续倾听中）';
-                if (isRecording && permissionGranted) {
-                    setTimeout(() => recognition.start(), 300);
-                }
-            } else {
-                voiceStatus.className = 'error';
-                voiceStatus.textContent = `❌ 识别异常：${event.error}（已保存部分内容）`;
-                if (isRecording && permissionGranted) {
-                    setTimeout(() => recognition.start(), 500);
-                }
-            }
-        }
-
-        voiceInputBtn.addEventListener('click', async () => {
-            if (!recognition) {
-                initVoiceRecognition();
-                if (!recognition) return;
-            }
-
-            if (isRecording) {
-                isRecording = false;
-                recognition.stop();
-                voiceStatus.textContent = '🔄 正在整理识别结果...';
-                return;
-            }
-
-            voiceStatus.className = '';
-            voiceStatus.textContent = '🔄 正在请求麦克风权限...';
-            try {
-                permissionGranted = false;
-                tempTranscript = '';
-                lastResultTime = 0;
-                isRestarting = false;
-                await recognition.start();
-            } catch (err) {
-                voiceStatus.className = 'error';
-                if (err.message.includes('not-allowed')) {
-                    voiceStatus.textContent = '❌ 权限请求失败！请在浏览器设置中开启麦克风权限';
-                } else {
-                    voiceStatus.textContent = `❌ 启动录音失败：${err.message}`;
-                }
-                isRecording = false;
-            }
-        });
-
-        // ========== 原有功能优化（新增编辑/删除逻辑） ==========
-        // 新增：编辑日志函数
+        // ========== 核心功能逻辑 ==========
+        // 编辑日志函数
         function editLog(index) {
             editingIndex = index;
             const log = logs[index];
@@ -782,7 +584,7 @@
             document.querySelector('.form-area').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // 新增：删除日志函数
+        // 删除日志函数
         function deleteLog(index) {
             if (confirm('确定要删除这篇日志吗？删除后无法恢复！')) {
                 logs.splice(index, 1);
@@ -793,7 +595,7 @@
             }
         }
 
-        // 新增：取消编辑函数
+        // 取消编辑函数
         function cancelEdit() {
             editingIndex = -1;
             // 清空表单
@@ -804,10 +606,9 @@
             publishBtn.textContent = '发布日志';
             cancelEditBtn.style.display = 'none';
             editTip.style.display = 'none';
-            voiceStatus.textContent = '';
         }
 
-        // 优化发布函数：支持编辑更新
+        // 发布/更新日志函数
         function publishLog() {
             const title = logTitle.value.trim();
             const content = logContent.value.trim();
@@ -829,7 +630,7 @@
                     tags: tags
                 };
                 alert('日志已成功更新！');
-                cancelEdit(); // 更新后取消编辑状态
+                cancelEdit();
             } 
             // 发布模式：新增日志
             else {
@@ -854,6 +655,7 @@
             renderTags();
         }
 
+        // 按日期筛选日志
         function filterLogsByDate() {
             const startDate = startDateInput.value;
             const endDate = endDateInput.value;
@@ -877,6 +679,7 @@
             renderLogs(filteredLogs);
         }
 
+        // 渲染标签列表
         function renderTags() {
             const allTags = [...new Set(logs.flatMap(log => log.tags))];
             tagList.innerHTML = '';
@@ -894,6 +697,7 @@
             });
         }
 
+        // 关键词搜索日志
         function searchLogs() {
             const keyword = searchInput.value.trim().toLowerCase();
             if (!keyword) {
@@ -908,9 +712,8 @@
             renderLogs(filteredLogs);
         }
 
-        // 优化渲染函数：添加编辑/删除按钮 + 记录当前渲染的日志
+        // 渲染日志列表
         function renderLogs(logsToRender) {
-            // 更新当前渲染的日志（用于导出）
             currentRenderedLogs = logsToRender;
             
             if (logsToRender.length === 0) {
@@ -920,7 +723,7 @@
 
             let logsHtml = '';
             logsToRender.forEach((log, index) => {
-                // 找到原始数组中的索引（用于编辑/删除）
+                // 找到原始数组中的索引
                 const originalIndex = logs.findIndex(item => 
                     item.title === log.title && 
                     item.time === log.time && 
@@ -942,7 +745,7 @@
             logsList.innerHTML = logsHtml;
         }
 
-        // ========== 新增：导出功能核心逻辑 ==========
+        // ========== 导出功能逻辑 ==========
         // 打开导出弹窗
         exportBtn.addEventListener('click', () => {
             if (currentRenderedLogs.length === 0) {
@@ -984,7 +787,6 @@
 
         // 导出为TXT
         function exportAsTXT() {
-            // 构建内容：先目录，后正文
             let content = '===== 日志目录 =====\n';
             currentRenderedLogs.forEach((log, index) => {
                 content += `${index + 1}. ${log.title}\n`;
@@ -999,12 +801,11 @@
                 content += '-------------------------\n\n';
             });
 
-            // 生成文件并下载
             const blob = new Blob([content], { type: 'text/plain; charset=utf-8' });
             saveAs(blob, `我的博客日志_${new Date().toLocaleDateString()}.txt`);
         }
 
-        // 导出为PDF（目录不可点击，前端轻量方案限制）
+        // 导出为PDF
         function exportAsPDF() {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
@@ -1023,7 +824,7 @@
             pdf.text('===== 日志目录 =====', 20, 40);
             let yPos = 50;
             currentRenderedLogs.forEach((log, index) => {
-                if (yPos > 280) { // 分页
+                if (yPos > 280) {
                     pdf.addPage();
                     yPos = 20;
                 }
@@ -1052,9 +853,9 @@
                 yPos += 8;
                 // 内容（分行处理）
                 pdf.setFontSize(10);
-                const contentLines = pdf.splitTextToSize(log.content, 170); // 宽度170mm
+                const contentLines = pdf.splitTextToSize(log.content, 170);
                 pdf.text(contentLines, 20, yPos);
-                yPos += contentLines.length * 6 + 10; // 行高6mm，间距10mm
+                yPos += contentLines.length * 6 + 10;
                 // 分隔线
                 pdf.setLineWidth(0.1);
                 pdf.line(20, yPos, 190, yPos);
@@ -1065,9 +866,8 @@
             pdf.save(`我的博客日志_${new Date().toLocaleDateString()}.pdf`);
         }
 
-        // 导出为EPUB（目录可点击）
+        // 导出为EPUB
         function exportAsEPUB() {
-            // 构建EPUB结构：目录+正文
             const epubOptions = {
                 title: `我的博客日志_${new Date().toLocaleDateString()}`,
                 author: '个人博客',
@@ -1076,7 +876,7 @@
                 content: []
             };
 
-            // 第一步：添加目录页
+            // 目录页
             let tocContent = '<h1>日志目录</h1><ul>';
             currentRenderedLogs.forEach((log, index) => {
                 tocContent += `<li><a href="#log-${index}">${index + 1}. ${log.title}</a></li>`;
@@ -1088,7 +888,7 @@
                 data: tocContent
             });
 
-            // 第二步：添加每个日志的正文页（带锚点）
+            // 正文页
             currentRenderedLogs.forEach((log, index) => {
                 const logContent = `
                     <div id="log-${index}">
@@ -1116,24 +916,29 @@
             });
         }
 
-        // 绑定事件（新增取消编辑按钮事件）
+        // ========== 事件绑定 ==========
         publishBtn.addEventListener('click', publishLog);
-        cancelEditBtn.addEventListener('click', cancelEdit); // 新增
+        cancelEditBtn.addEventListener('click', cancelEdit);
         dateSearchBtn.addEventListener('click', filterLogsByDate);
         searchBtn.addEventListener('click', searchLogs);
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') searchLogs();
         });
 
-        // 页面加载初始化
-        window.addEventListener('load', () => {
-            checkEnv();
-            initVoiceRecognition();
+        // 全局错误捕获（避免单个功能报错阻断页面）
+        window.addEventListener('error', (e) => {
+            console.error('页面执行错误：', e.message);
             renderLogs(logs);
             renderTags();
         });
 
-        // 暴露全局函数（供按钮调用）
+        // 页面加载初始化
+        window.addEventListener('load', () => {
+            renderLogs(logs);
+            renderTags();
+        });
+
+        // 暴露全局函数
         window.editLog = editLog;
         window.deleteLog = deleteLog;
     </script>
